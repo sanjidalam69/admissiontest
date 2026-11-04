@@ -14617,11 +14617,19 @@ async function extractAdminPdf(file){
 function copyPdfText(){const el=document.getElementById('pdfExtractedText');el.select();try{document.execCommand('copy');adminSetStatus('PDF-এর লেখা কপি করা হয়েছে।');}catch(e){adminSetStatus('লেখা সিলেক্ট হয়েছে; কপি করুন।');}}
 // Google Sheets Live Sync & Leaderboard Integration
 const DEFAULT_SHEET_KEY = 'adprep_sheet_url';
-const BUILTIN_DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwtcfeP5FQ-3-ZCGg7RQcsmX9LZg25E6prEcQ_i9qYGZQe-onYqRATTSh_yAvn_4FbG8Q/exec';
+const BUILTIN_DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwtcfeP5FQ-3-ZCGg7RQCsmX9LZg25E6prEcQ_i9qYGZQe-onYqRATTSh_yAvn_4FbG8Q/exec';
 let globalLeaderboardCache = [];
 
 function getSheetUrl() {
-  try { return localStorage.getItem(DEFAULT_SHEET_KEY) || BUILTIN_DEFAULT_SHEET_URL; } catch(e) { return BUILTIN_DEFAULT_SHEET_URL; }
+  try {
+    const saved = (localStorage.getItem(DEFAULT_SHEET_KEY) || '').trim();
+    if (saved && !saved.includes('RQcsm')) {
+      return saved;
+    }
+    return BUILTIN_DEFAULT_SHEET_URL;
+  } catch(e) {
+    return BUILTIN_DEFAULT_SHEET_URL;
+  }
 }
 
 function saveSheetConfig() {
@@ -14685,7 +14693,7 @@ function sendScoreToGoogleSheet(record) {
     fetch(sheetUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     }).then(() => {
       console.log('Score synced to Google Sheet');
